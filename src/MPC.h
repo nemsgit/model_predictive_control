@@ -8,6 +8,12 @@ using namespace std;
 
 class MPC {
  public:
+
+  double steer;
+  double throttle;
+  vector<double> mpc_x;
+  vector<double> mpc_y;
+
   MPC();
 
   virtual ~MPC();

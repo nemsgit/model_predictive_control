@@ -12,6 +12,11 @@
 // for convenience
 using json = nlohmann::json;
 
+// Constants
+const double LF = 2.67;         // parameter in car's kenimatic model
+const int ORDER = 3;            // polyfit order
+const double LATENCY = 0.1;        // control latency time, in second.
+
 // For converting back and forth between radians and degrees.
 constexpr double pi() { return M_PI; }
 double deg2rad(double x) { return x * pi() / 180; }
@@ -91,41 +96,64 @@ int main() {
           double py = j[1]["y"];
           double psi = j[1]["psi"];
           double v = j[1]["speed"];
+          double delta = j[1]["steering_angle"];
+          delta *= -deg2rad(25);    // simulator's steer = 1 corresponds to 25 degree toward right
+                                    // in mpc we define angles in rads and set 'left' as positive
+          double a = j[1]["throttle"];
 
-          /*
-          * TODO: Calculate steeering angle and throttle using MPC.
-          *
-          * Both are in between [-1, 1].
-          *
-          */
-          double steer_value;
-          double throttle_value;
 
+          // Transform reference points to local coordinate system
+          for(int i = 0; i < ptsx.size(); i++) {
+              double x = ptsx[i] - px;
+              double y = ptsy[i] - py;
+              ptsx[i] = x * cos(-psi) - y * sin(-psi);
+              ptsy[i] = x * sin(-psi) + y * cos(-psi);
+          }
+
+          // Convert coordinates to Eigen vectors and polyfit
+          Eigen::VectorXd ptsx_evec = Eigen::VectorXd::Map(ptsx.data(), ptsx.size());
+          Eigen::VectorXd ptsy_evec = Eigen::VectorXd::Map(ptsy.data(), ptsy.size());
+          auto coeffs = polyfit(ptsx_evec, ptsy_evec, ORDER);
+
+          // Reset px, py, and psi in local coordinate system
+          px = 0;
+          py = 0;
+          psi = 0;
+
+          // Calculate initial cte and epsi using the fitting coefficients
+          double cte = coeffs[0]; // simplified from polyeval(coeffs, px) - py;
+          double epsi = -atan(coeffs[1]); // simplified from psi - atan(coeffs[1]);
+
+          // Predict the state after latency time
+          double px_delayed = px + v * LATENCY;
+          double py_delayed = py;
+          double psi_delayed = psi + v * (delta) / LF * LATENCY ;
+          double v_delayed = v + a * LATENCY;
+          double cte_delayed = cte + v * sin(epsi) * LATENCY;
+          double epsi_delayed = epsi + v * (delta) / LF * LATENCY;
+
+          Eigen::VectorXd state(6);
+          state << px_delayed, py_delayed, psi_delayed, v_delayed, cte_delayed, epsi_delayed;
+
+          // Solve with mpc
+          mpc.Solve(state, coeffs);
+
+          //*******************************
+          // Plug results to the simulator
+          //*******************************
           json msgJson;
-          // NOTE: Remember to divide by deg2rad(25) before you send the steering value back.
-          // Otherwise the values will be in between [-deg2rad(25), deg2rad(25] instead of [-1, 1].
-          msgJson["steering_angle"] = steer_value;
-          msgJson["throttle"] = throttle_value;
 
-          //Display the MPC predicted trajectory 
-          vector<double> mpc_x_vals;
-          vector<double> mpc_y_vals;
+          // Set controls
+          msgJson["steering_angle"] = -mpc.steer/deg2rad(25); // convert mpc steer back to simulator steer
+          msgJson["throttle"] = mpc.throttle;
 
-          //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
-          // the points in the simulator are connected by a Green line
-
-          msgJson["mpc_x"] = mpc_x_vals;
-          msgJson["mpc_y"] = mpc_y_vals;
+          // Display the MPC predicted trajectory
+          msgJson["mpc_x"] = mpc.mpc_x;
+          msgJson["mpc_y"] = mpc.mpc_y;
 
           //Display the waypoints/reference line
-          vector<double> next_x_vals;
-          vector<double> next_y_vals;
-
-          //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
-          // the points in the simulator are connected by a Yellow line
-
-          msgJson["next_x"] = next_x_vals;
-          msgJson["next_y"] = next_y_vals;
+          msgJson["next_x"] = ptsx;
+          msgJson["next_y"] = ptsy;
 
 
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
