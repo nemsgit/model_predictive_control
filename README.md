@@ -14,10 +14,9 @@ Self-Driving Car Engineer Nanodegree Program
       5. cte - cross track error
       6. epsi - orientation error
     * At the same time, the car has two actuators:
-      1. delta - steering angle (It is worth noting that the steering angle is defined\
-       differently in the simulator and the MPC class. [-1,1] in the simulator corresponds\
-       to [deg2rad(25), -deg2rad(25)]. So a conversion factor of -deg2rad(25) is needed\
-       between the two systems.)
+      1. delta - steering angle (It is worth noting that the steering angle is defined differently in the simulator and\
+       the MPC class. [-1,1] in the simulator corresponds to [deg2rad(25), -deg2rad(25)]. So a conversion factor of\
+        -deg2rad(25) is needed between the two systems.)
       2. a - throttle
   * Kinematic model as update equations.
     * The following equations are used for updating the state variables
@@ -28,6 +27,31 @@ Self-Driving Car Engineer Nanodegree Program
     v_[t+1] = v[t] + a[t] * dt
     cte[t+1] = f(x[t]) - y[t] + v[t] * sin(epsi[t]) * dt
     epsi[t+1] = psi[t] - psides[t] + v[t] * delta[t] / Lf * dt
+    ```
+  * Cost function
+    * The cost function contains altogether 7 terms, which are associated with the cross track error(cte), the \
+    orientation error (epsi), the difference between reference and actual velocity (v - v_ref), the magnitudes of \
+    steering angle (delta) and throttle(a), and their respective changing rates ((delta[t+1] - delta[t]) and \
+    (a[t+1] - a[t])). Concretely, the following code accumulates the cost value originated from each term. Note that \
+    each term has been assigned with a weight factor as an addition knob to balance their relative weights in the \
+    total cost.
+    ```
+    // cte, epsi, and v - v_ref
+    for (int t = 0; t < N; t++) {
+        fg[0] += w_cte * CppAD::pow(vars[cte_start + t], 2);
+        fg[0] += w_epsi * CppAD::pow(vars[epsi_start + t], 2);
+        fg[0] += w_v * CppAD::pow(vars[v_start + t] - v_ref, 2);
+    }
+    // delta and a
+    for (int t = 0; t < N - 1; t++) {
+        fg[0] += w_delta * CppAD::pow(vars[delta_start + t], 2);
+        fg[0] += w_a * CppAD::pow(vars[a_start + t], 2);
+    }
+    // changing rates of delta and a
+    for (int t = 0; t < N - 2; t++) {
+        fg[0] += w_ddelta * CppAD::pow(vars[delta_start + t + 1] - vars[delta_start + t], 2);
+        fg[0] += w_da * CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2);
+    }
     ```
 
 * Timestep length and elapsed duration (N and dt)
