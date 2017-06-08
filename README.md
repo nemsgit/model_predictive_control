@@ -6,6 +6,7 @@ Self-Driving Car Engineer Nanodegree Program
 
 * The model
   * State variables and actuators
+
   Each state at a given time has six variables, including:
    x - x coordinate
    y - y coordinate
@@ -17,7 +18,7 @@ Self-Driving Car Engineer Nanodegree Program
   At the same time, the car has two actuators:
    delta - steering angle
    a - throttle
-   
+
 * Timestep length and elapsed duration (N and dt)
 * Polynomial fitting
 * Latency
