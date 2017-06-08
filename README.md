@@ -7,15 +7,15 @@ Self-Driving Car Engineer Nanodegree Program
 * The model
   * State variables and actuators
     * Each state at a given time has six variables, including:
-        1. x - x coordinate
-        2. y - y coordinate
-        3. psi - orientation
-        4. v - velocity
-        5. cte - cross track error
-        6. epsi - orientation error
+      1. x - x coordinate
+      2. y - y coordinate
+      3. psi - orientation
+      4. v - velocity
+      5. cte - cross track error
+      6. epsi - orientation error
     * At the same time, the car has two actuators:
-        1. delta - steering angle
-        2. a - throttle
+      1. delta - steering angle
+      2. a - throttle
     It is worth noting that the steering angle is defined differently in the simulator
     and the MPC class
 * Timestep length and elapsed duration (N and dt)
