@@ -16,6 +16,8 @@ Self-Driving Car Engineer Nanodegree Program
     * At the same time, the car has two actuators:
         1. delta - steering angle
         2. a - throttle
+    It is worth noting that the steering angle is defined differently in the simulator
+    and the MPC class
 * Timestep length and elapsed duration (N and dt)
 * Polynomial fitting
 * Latency
