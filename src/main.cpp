@@ -101,6 +101,9 @@ int main() {
                                     // in mpc we define angles in rads and set 'left' as positive
           double a = j[1]["throttle"];
 
+          //*****************************************************
+          // Preprocess the data and use mpc to solve the problem
+          //*****************************************************
 
           // Transform reference points to local coordinate system
           for(int i = 0; i < ptsx.size(); i++) {
