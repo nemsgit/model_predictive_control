@@ -53,10 +53,68 @@ Self-Driving Car Engineer Nanodegree Program
         fg[0] += w_da * CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2);
     }
     ```
+  * Lower and upper bounds
+    * Variable bounds - I set three variable bounds in the MPC. First, the orientation angle is limited to
+    [-5/8 * PI(), 5/8 * PI()], as it is impractical for psi to go beyond this range within N prediction steps. Second,
+    the steering angle is constrained to [-25, 25] (degree) according to the physical limit of steering control. Third,
+    the throttle is limited to [-1, 1] to avoid excessive acceleration/decelerations.
+
+    * Constraint bounds - Each of the 6*N constraints has its lower and upper bounds as well. The ones corresponding to
+    the initial state (t = 0) are constrained to their initial values. The rest constraints are set according to the
+    update equation shown above. More explanations can be found in the codes.
 
 * Timestep length and elapsed duration (N and dt)
-* Polynomial fitting
+  * N is the number of future time steps we will be predicting, and dt is the length of each time step. N * dt gives
+   the total time we can 'foresee' at each moment. An overly large N value would spend extra computational costs on
+   unnecessary information. Moreover, it gives less accuracy as process noise accumulates over time. On the other hand,
+   a too small N value would make the car too 'near-sighted' and unable to make sufficient and accurate predictions.
+   Similarly, a too small dt value would cost unnecessary computational expanses, while a too large dt would reduce
+   prediction accuracy as the steps are too discrete. I have tried a series of N values from 4 to 12 and finally settled
+   down with N = 8. The simulation results are pretty consistent with the above analysis.
+
+* Coordinate transformation and polynomial fitting
+  * Before poly-fitting the reference curve (ptsx, ptsy), I transform their coordinates to the car's local coordinate
+  system. Concretely, it is done by the following code (where px, py, and psi are the global position and orientation
+  of the car):
+  ```
+  // Transform reference points to local coordinate system
+  for(int i = 0; i < ptsx.size(); i++) {
+      double x = ptsx[i] - px;
+      double y = ptsy[i] - py;
+      ptsx[i] = x * cos(-psi) - y * sin(-psi);
+      ptsy[i] = x * sin(-psi) + y * cos(-psi);
+  }
+  ```
+  * After this step I also reset px, py, and psi to their local coordinates:
+  ```
+  // Reset px, py, and psi in local coordinate system
+  px = 0;
+  py = 0;
+  psi = 0;
+  ```
+  * The reference points are then fitted by 3rd order polynomial curve to obtain the fitting coefficients (coeffs):
+  ```
+  auto coeffs = polyfit(ptsx_evec, ptsy_evec, 3);
+  ```
 * Latency
+  * To deal with latency, we do not send the current state directly to the MPC solver. Instead, we "manually" predict
+  the future state after the latency time, and feed that future state to the model. The following code takes care of
+  the 'manual prediction'. It is nothing else but reusing the update equation in the car's local coordinate system.
+  The LATENCY is set to be 0.1 second in this case. We then construct a state vector with these "future" values and
+  send it to the MPC solver.
+  ```
+  double px_delayed = px + v * LATENCY;
+  double py_delayed = py;
+  double psi_delayed = psi + v * (delta) / LF * LATENCY ;
+  double v_delayed = v + a * LATENCY;
+  double cte_delayed = cte + v * sin(epsi) * LATENCY;
+  double epsi_delayed = epsi + v * (delta) / LF * LATENCY;
+  ```
+
+After completing all the steps the model is fully functional and supports reference velocities up to v_ref = 70.
+Higher reference velocity would potentially drive the car out of curb. Further optimization of the hyper-parameters
+(N, dt, and weights of different cost terms) will likely enable higher driving speed.
+
 
 
 ## Dependencies
