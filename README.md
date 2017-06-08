@@ -21,14 +21,14 @@ Self-Driving Car Engineer Nanodegree Program
       2. a - throttle
   * Kinematic model as update equations.
     * The following equations are used for updating the state variables
-    '''
+    ```
     x_[t+1] = x[t] + v[t] * cos(psi[t]) * dt
     y_[t+1] = y[t] + v[t] * sin(psi[t]) * dt
     psi_[t+1] = psi[t] + v[t] / Lf * delta[t] * dt
     v_[t+1] = v[t] + a[t] * dt
     cte[t+1] = f(x[t]) - y[t] + v[t] * sin(epsi[t]) * dt
     epsi[t+1] = psi[t] - psides[t] + v[t] * delta[t] / Lf * dt
-    '''
+    ```
 
 * Timestep length and elapsed duration (N and dt)
 * Polynomial fitting
