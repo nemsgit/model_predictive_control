@@ -14,11 +14,11 @@ Self-Driving Car Engineer Nanodegree Program
       5. cte - cross track error
       6. epsi - orientation error
     * At the same time, the car has two actuators:
-      1. delta - steering angle
+      1. delta - steering angle (It is worth noting that the steering angle is defined\
+       differently in the simulator and the MPC class. [-1,1] in the simulator corresponds\
+       to [deg2rad(25), -deg2rad(25)]. So a conversion factor of -deg2rad(25) is needed\
+       between the two systems.
       2. a - throttle
-
-    It is worth noting that the steering angle is defined differently in the simulator
-    and the MPC class
 * Timestep length and elapsed duration (N and dt)
 * Polynomial fitting
 * Latency
