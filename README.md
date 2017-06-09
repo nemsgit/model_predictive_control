@@ -7,18 +7,18 @@ Self-Driving Car Engineer Nanodegree Program
 * The model
   * State variables and actuators
     * Each state at a given time has six variables, including:
-      1. x - x coordinate
-      2. y - y coordinate
-      3. psi - orientation
-      4. v - velocity
-      5. cte - cross track error
-      6. epsi - orientation error
+        1. x - x coordinate
+        2. y - y coordinate
+        3. psi - orientation
+        4. v - velocity
+        5. cte - cross track error
+        6. epsi - orientation error
     * At the same time, the car has two actuators:
-      1. delta - steering angle (It is worth noting that the steering angle is defined differently in the simulator and\
-       the MPC class. [-1,1] in the simulator corresponds to [deg2rad(25), -deg2rad(25)]. So a conversion factor of\
-        -deg2rad(25) is needed between the two systems.)
-      2. a - throttle
-  * Kinematic model as update equations.
+        1. delta - steering angle (It is worth noting that the steering angle is defined differently in the simulator
+        and the MPC class. [-1,1] in the simulator corresponds to [deg2rad(25), -deg2rad(25)] in the MPC class. So a
+        conversion factor of -deg2rad(25) is needed between the two systems.)
+        2. a - throttle
+  * Update equations
     * The following equations are used for updating the state variables
     ```
     x_[t+1] = x[t] + v[t] * cos(psi[t]) * dt
@@ -29,14 +29,14 @@ Self-Driving Car Engineer Nanodegree Program
     epsi[t+1] = psi[t] - psides[t] + v[t] * delta[t] / Lf * dt
     ```
   * Cost function
-    * The cost function contains altogether 7 terms, which are associated with the cross track error(cte), the \
-    orientation error (epsi), the difference between reference and actual velocity (v - v_ref), the magnitudes of \
-    steering angle (delta) and throttle(a), and their respective changing rates ((delta[t+1] - delta[t]) and \
-    (a[t+1] - a[t])). Concretely, the following code accumulates the cost value originated from each term. Note that \
-    each term has been assigned with a weight factor as an addition knob to balance their relative weights in the \
+    * The cost function contains altogether 7 terms, which are associated with the cross track error(cte), the
+    orientation error (epsi), the difference between reference and actual velocity (v - v_ref), the magnitudes of
+    steering angle (delta) and throttle(a), and their respective changing rates ((delta[t+1] - delta[t]) and
+    (a[t+1] - a[t])). Concretely, the following code accumulates the cost value originated from each term. Note that
+    each term has been assigned with a weight factor as an additional knob to balance their relative weights in the
     total cost.
     ```
-    // cte, epsi, and v - v_ref
+    // cte, epsi, and v-v_ref
     for (int t = 0; t < N; t++) {
         fg[0] += w_cte * CppAD::pow(vars[cte_start + t], 2);
         fg[0] += w_epsi * CppAD::pow(vars[epsi_start + t], 2);
@@ -66,9 +66,9 @@ Self-Driving Car Engineer Nanodegree Program
 * Timestep length and elapsed duration (N and dt)
   * N is the number of future time steps we will be predicting, and dt is the length of each time step. N * dt gives
    the total time we can 'foresee' at each moment. An overly large N value would spend extra computational costs on
-   unnecessary information. Moreover, it gives less accuracy as process noise accumulates over time. On the other hand,
+   unnecessary information. Moreover, it gives lower accuracy as process noise accumulates over time. On the other hand,
    a too small N value would make the car too 'near-sighted' and unable to make sufficient and accurate predictions.
-   Similarly, a too small dt value would cost unnecessary computational expanses, while a too large dt would reduce
+   Similarly, a too small dt value would cost unnecessary computational expanse, while a too large dt would reduce
    prediction accuracy as the steps are too discrete. I have tried a series of N values from 4 to 12 and finally settled
    down with N = 8. The simulation results are pretty consistent with the above analysis.
 
