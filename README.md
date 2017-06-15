@@ -14,9 +14,7 @@ Self-Driving Car Engineer Nanodegree Program
         5. cte - cross track error
         6. epsi - orientation error
     * At the same time, the car has two actuators:
-        1. delta - steering angle (It is worth noting that the steering angle is defined differently in the simulator
-        and the MPC class. [-1,1] in the simulator corresponds to [deg2rad(25), -deg2rad(25)] in the MPC class. So a
-        conversion factor of -deg2rad(25) is needed between the two systems.)
+        1. delta - steering angle 
         2. a - throttle
   * Update equations
     * The following equations are used for updating the state variables
@@ -70,7 +68,7 @@ Self-Driving Car Engineer Nanodegree Program
    a too small N value would make the car too 'near-sighted' and unable to make sufficient and accurate predictions.
    Similarly, a too small dt value would cost unnecessary computational expanse, while a too large dt would reduce
    prediction accuracy as the steps are too discrete. I have tried a series of N values from 4 to 12 and finally settled
-   down with N = 8. The simulation results are pretty consistent with the above analysis.
+   down with N = 10. The simulation results are pretty consistent with the above analysis.
 
 * Coordinate transformation and polynomial fitting
   * Before poly-fitting the reference curve (ptsx, ptsy), I transform their coordinates to the car's local coordinate
