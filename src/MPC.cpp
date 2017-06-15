@@ -5,10 +5,10 @@
 
 using CppAD::AD;
 
-size_t N = 8; // number of future states we will predict
+size_t N = 10; // number of future states we will predict
 double dt = 0.1; // time duration between two adjacent states, in second.
 const double Lf = 2.67;
-double v_ref = 60.0; // reference speed
+double v_ref = 70.0; // reference speed
 
 size_t n_state = 6;         // number of state variables: x, y, psi, v, cte, and epsi
 size_t n_actuators = 2;     // number of actuators: delta and a
@@ -16,13 +16,13 @@ size_t n_vars = n_state * N + n_actuators * (N - 1);  // size of vars vector (as
 size_t n_constraints = n_state * N;     // size of fg vector (as explained in the FG_eval class)
 
 // weights of different cost terms
-double w_cte = 1500.0;      // weight of cross track error
-double w_epsi = 1500.0;     // weight of orientation error
+double w_cte = 500.0;      // weight of cross track error
+double w_epsi = 500.0;     // weight of orientation error
 double w_v = 1.0;           // weight of velocity error
-double w_delta = 5000.0;    // weight of large steering cost
-double w_a = 10.0;          // weight of large throttle cost
-double w_ddelta = 5000.0;   // weight of large steering changing rate cost
-double w_da = 5000.0;       // weight of large throttle changing rate cost
+double w_delta = 100.0;    // weight of large steering cost
+double w_a = 5.0;          // weight of large throttle cost
+double w_ddelta = 100.0;   // weight of large steering changing rate cost
+double w_da = 1.0;       // weight of large throttle changing rate cost
 
 // starting position of different state variables
 size_t x_start = 0;
@@ -37,8 +37,8 @@ size_t a_start = delta_start + N - 1;
 // upper and lower limits of variables
 double l_state = 1.0e19;           // limit of x, y, v, cte, epsi
 double l_psi = 1.9635;             // limit of psi (5/8 * PI)
-double l_delta = 0.4363;           // limit of steer (25 degree)
-double l_a = 1.0;                  // limit of throttle
+double l_delta = 0.4363 * Lf;           // limit of steer (25 degree)
+double l_a = 2.0;                  // limit of acceleration
 
 class FG_eval {
  public:
