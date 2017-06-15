@@ -13,7 +13,7 @@
 using json = nlohmann::json;
 
 // Constants
-const double LF = 2.67;         // parameter in car's kenimatic model
+const double Lf = 2.67;         // parameter in car's kenimatic model
 const int ORDER = 3;            // polyfit order
 const double LATENCY = 0.1;        // control latency time, in second.
 
@@ -97,8 +97,7 @@ int main() {
           double psi = j[1]["psi"];
           double v = j[1]["speed"];
           double delta = j[1]["steering_angle"];
-          delta *= -deg2rad(25);    // simulator's steer = 1 corresponds to 25 degree toward right
-                                    // in mpc we define angles in rads and set 'left' as positive
+          delta *= -1.0; // reverse steering angle as it's defined in opposite ways in MPC and simulator.
           double a = j[1]["throttle"];
 
           //*****************************************************
@@ -130,10 +129,10 @@ int main() {
           // Predict the state after latency time
           double px_delayed = px + v * LATENCY;
           double py_delayed = py;
-          double psi_delayed = psi + v * (delta) / LF * LATENCY ;
+          double psi_delayed = psi + v * (delta) / Lf * LATENCY ;
           double v_delayed = v + a * LATENCY;
           double cte_delayed = cte + v * sin(epsi) * LATENCY;
-          double epsi_delayed = epsi + v * (delta) / LF * LATENCY;
+          double epsi_delayed = epsi + v * (delta) / Lf * LATENCY;
 
           Eigen::VectorXd state(6);
           state << px_delayed, py_delayed, psi_delayed, v_delayed, cte_delayed, epsi_delayed;
@@ -147,7 +146,7 @@ int main() {
           json msgJson;
 
           // Set controls
-          msgJson["steering_angle"] = -mpc.steer/deg2rad(25); // convert mpc steer back to simulator steer
+          msgJson["steering_angle"] = -mpc.steer/(deg2rad(25) * Lf); // convert mpc steer back to simulator steer
           msgJson["throttle"] = mpc.throttle;
 
           // Display the MPC predicted trajectory
