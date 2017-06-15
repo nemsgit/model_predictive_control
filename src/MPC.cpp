@@ -38,7 +38,7 @@ size_t a_start = delta_start + N - 1;
 double l_state = 1.0e19;           // limit of x, y, v, cte, epsi
 double l_psi = 1.9635;             // limit of psi (5/8 * PI)
 double l_delta = 0.4363 * Lf;           // limit of steer (25 degree)
-double l_a = 2.0;                  // limit of acceleration
+double l_a = 1.0;                  // limit of acceleration
 
 class FG_eval {
  public:
